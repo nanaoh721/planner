@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --border: #D8D4CC;
+    --text: #1A1916;
+    --muted: #9A968E;
+    --faint: #ECEAE5;
+    --red: #C4432A;
+    --red-bg: #FDF0ED;
+    --orange: #B86A1A;
+    --orange-bg: #FDF4E7;
+    --green: #2D6A4A;
+    --green-bg: #EAF4EE;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: var(--sans);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 40px 36px;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 14px;
+    margin-bottom: 32px;
+  }
+  .page-header h1 {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .page-header .sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .meta-fields {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+  }
+  .meta-field label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .meta-field input {
+    font-family: var(--mono);
+    font-size: 13px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    padding: 2px 0;
+    width: 110px;
+    outline: none;
+  }
+  .meta-field input:focus { border-bottom-color: var(--text); }
+
+  /* ── STEP LABELS ── */
+  .step-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .step-label strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── SECTION BLOCK ── */
+  .section { margin-bottom: 36px; }
+
+  /* ── CAPACITY STRIP ── */
+  .capacity-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .cap-cell {
+    background: var(--surface);
+    padding: 10px 14px;
+  }
+  .cap-cell .clabel {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 5px;
+  }
+  .cap-cell input {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    width: 100%;
+    outline: none;
+  }
+  .cap-cell input::placeholder { color: var(--faint); }
+  .cap-cell .chelp {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── MILESTONE TABLE ── */
+  .ms-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .ms-table thead tr {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .ms-table thead th {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 12px;
+    text-align: left;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .ms-table thead th:last-child { border-right: none; }
+
+  .ms-table tbody tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .ms-table tbody tr:last-child { border-bottom: none; }
+  .ms-table tbody tr:hover { background: var(--faint); }
+
+  .ms-table td {
+    padding: 10px 12px;
+    vertical-align: top;
+    border-right: 1px solid var(--border);
+  }
+  .ms-table td:last-child { border-right: none; }
+
+  .ms-table td input,
+  .ms-table td select,
+  .ms-table td textarea {
+    font-family: var(--sans);
+    font-size: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    width: 100%;
+    outline: none;
+    resize: none;
+  }
+  .ms-table td textarea { min-height: 36px; line-height: 1.5; }
+  .ms-table td input::placeholder,
+  .ms-table td textarea::placeholder { color: var(--muted); font-size: 11px; }
+
+  .ms-table td select {
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .ms-table td.priority-cell { width: 64px; }
+  .ms-table td.domain-cell { width: 80px; }
+  .ms-table td.deadline-cell { width: 72px; }
+  .ms-table td.hours-cell { width: 56px; }
+  .ms-table td.feasibility-cell { width: 80px; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .pill-high { background: var(--red-bg); color: var(--red); }
+  .pill-mid { background: var(--orange-bg); color: var(--orange); }
+  .pill-low { background: var(--faint); color: var(--muted); }
+
+  select.priority-select {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  /* ── FEASIBILITY BADGE ── */
+  .feas-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--faint);
+    color: var(--muted);
+    display: inline-block;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .feas-badge.ok { background: var(--green-bg); color: var(--green); border-color: #B0D4C0; }
+  .feas-badge.risky { background: var(--orange-bg); color: var(--orange); border-color: #E8C28A; }
+  .feas-badge.no { background: var(--red-bg); color: var(--red); border-color: #E8A898; }
+
+  /* ── TASK BREAKDOWN ── */
+  .task-section {
+    margin-top: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .task-section-header {
+    background: var(--faint);
+    padding: 7px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .task-section-header span {
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .task-row {
+    display: grid;
+    grid-template-columns: 1fr 80px 60px 100px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .task-row:last-child { border-bottom: none; }
+  .task-row input, .task-row select {
+    font-family: var(--sans);
+    font-size: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    padding: 8px 12px;
+    outline: none;
+    width: 100%;
+  }
+  .task-row input::placeholder { color: var(--muted); font-size: 11px; }
+  .task-row .task-divider {
+    border-left: 1px solid var(--border);
+  }
+  .task-add-btn {
+    display: block;
+    width: 100%;
+    padding: 7px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-top: 1px dashed var(--border);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: 0.5px;
+  }
+  .task-add-btn:hover { background: var(--faint); color: var(--text); }
+
+  /* ── ROUTINE BLOCK ── */
+  .routine-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .routine-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 80px 80px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .routine-row:last-child { border-bottom: none; }
+  .routine-row input {
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+  }
+  .routine-row input::placeholder { color: var(--muted); font-size: 11px; }
+  .routine-row .divider { border-left: 1px solid var(--border); }
+  .routine-header {
+    background: var(--faint);
+    border-bottom: 1px solid var(--border);
+  }
+  .routine-header div {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 6px 12px;
+  }
+
+  /* ── TOTAL CALCULATOR ── */
+  .total-block {
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .total-left {
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+  .total-left .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .total-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .total-item .name { color: var(--muted); }
+  .total-item .h { font-family: var(--mono); font-weight: 500; }
+  .total-right {
+    background: var(--text);
+    color: var(--bg);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .total-right .label {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.5;
+    margin-bottom: 6px;
+  }
+  .total-right .big {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .total-right .status {
+    font-family: var(--mono);
+    font-size: 11px;
+    opacity: 0.6;
+  }
+  .total-right .cap-info {
+    font-family: var(--mono);
+    font-size: 10px;
+    opacity: 0.4;
+    margin-top: 10px;
+  }
+
+  /* ── NOTES ── */
+  .notes-block {
+    margin-top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .notes-block .nlabel {
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .notes-block textarea {
+    font-family: var(--sans);
+    font-size: 12px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    resize: none;
+    outline: none;
+    min-height: 56px;
+    line-height: 1.7;
+  }
+  .notes-block textarea::placeholder { color: var(--muted); }
+
+  /* ── ADD ROW BTN ── */
+  .add-row-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 1px dashed var(--border);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: 0.5px;
+  }
+  .add-row-btn:hover { background: var(--faint); color: var(--text); }
+
+  @media print {
+    body { background: white; padding: 20px; }
+    input, textarea, select { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<div class="page-header">
+  <div>
+    <h1>Weekly Planner</h1>
+    <div class="sub">마일스톤 → 아웃풋 → 현실성 검토 → 시간 배분</div>
+  </div>
+  <div class="meta-fields">
+    <div class="meta-field">
+      <label>Week</label>
+      <input type="text" placeholder="4W1" id="weekInput" oninput="updateTotals()">
+    </div>
+    <div class="meta-field">
+      <label>기간</label>
+      <input type="text" placeholder="4/1 ~ 4/5">
+    </div>
+    <div class="meta-field">
+      <label>가용시간</label>
+      <input type="number" placeholder="44" id="capacity" value="44" oninput="updateTotals()"> h
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     STEP 1 — 마일스톤 + 아웃풋 + 희망마감
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="step-label"><strong>STEP 1</strong> — 이번 주 마일스톤 정의: 무엇을 완성할 것인가</div>
+
+  <table class="ms-table" id="milestoneTable">
+    <thead>
+      <tr>
+        <th class="priority-cell">우선도</th>
+        <th class="domain-cell">영역</th>
+        <th style="min-width:140px">마일스톤 (무엇을)</th>
+        <th style="min-width:160px">아웃풋 (완성의 증거)</th>
+        <th class="deadline-cell">희망마감</th>
+        <th class="feasibility-cell">현실성</th>
+      </tr>
+    </thead>
+    <tbody id="milestoneBody">
+      <!-- rows injected by JS -->
+    </tbody>
+  </table>
+  <button class="add-row-btn" onclick="addMilestoneRow()">+ 마일스톤 추가</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     STEP 2 — 태스크 역산 + 시간 견적
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="step-label"><strong>STEP 2</strong> — 태스크 역산: 마일스톤별 필요 태스크와 시간 견적</div>
+
+  <div id="taskBlocks">
+    <!-- task blocks injected by JS -->
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     STEP 3 — 루틴 고정 블록
+══════════════════════════════════════════ -->
+<div class="section">
+  <div class="step-label"><strong>STEP 3</strong> — 고정 루틴: 매주 나가는 시간 (건드리지 않는 블록)</div>
+
+  <div class="routine-block">
+    <div class="routine-row routine-header">
+      <div>루틴 항목</div>
+      <div class="divider">주기 / 단위</div>
+      <div class="divider">h/주</div>
+      <div class="divider">비고</div>
+    </div>
+    <div id="routineRows">
+      <!-- routine rows injected by JS -->
+    </div>
+  </div>
+  <button class="add-row-btn" onclick="addRoutineRow()">+ 루틴 추가</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TOTAL
+══════════════════════════════════════════ -->
+<div class="total-block">
+  <div class="total-left">
+    <div class="label">시간 합산</div>
+    <div id="totalBreakdown">
+      <div class="total-item" style="color:var(--muted);font-size:11px;font-family:var(--mono)">마일스톤과 루틴을 입력하면 자동 계산됩니다</div>
+    </div>
+  </div>
+  <div class="total-right">
+    <div>
+      <div class="label">Total</div>
+      <div class="big" id="totalHours">0h</div>
+      <div class="status" id="totalStatus">—</div>
+    </div>
+    <div class="cap-info" id="capInfo">가용 44h 기준</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     NOTES
+══════════════════════════════════════════ -->
+<div class="notes-block">
+  <div class="nlabel">이번 주 메모 / 현실성 검토 후 조정사항</div>
+  <textarea placeholder="현실성 검토 결과, 이월 항목, 특이사항 등 자유 기록..."></textarea>
+</div>
+
+
+<script>
+// ── DATA ──
+const DOMAINS = ['수익창출','브랜딩','레버리지','사업준비','투자운영','이직준비','기타'];
+const PRIORITIES = ['상','중','하'];
+const FEASIBILITY = ['검토전','가능','위험','불가'];
+const FEASIBILITY_CLASS = ['','ok','risky','no'];
+const FEASIBILITY_LABEL = ['?','✓ 가능','△ 위험','✕ 불가'];
+
+let milestoneCount = 0;
+let taskRowCounters = {};
+let routineCount = 0;
+
+// ── MILESTONE ROW ──
+function addMilestoneRow(data = {}) {
+  milestoneCount++;
+  const id = milestoneCount;
+  const tbody = document.getElementById('milestoneBody');
+  const tr = document.createElement('tr');
+  tr.id = `ms-row-${id}`;
+  tr.innerHTML = `
+    <td class="priority-cell">
+      <select class="priority-select" onchange="setPriorityStyle(this, ${id})">
+        ${PRIORITIES.map(p => `<option value="${p}" ${data.priority===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+    </td>
+    <td class="domain-cell">
+      <select style="font-family:var(--mono);font-size:11px;border:1px solid var(--border);background:var(--surface);padding:2px 4px;border-radius:2px;width:100%;outline:none;cursor:pointer">
+        ${DOMAINS.map(d => `<option ${data.domain===d?'selected':''}>${d}</option>`).join('')}
+      </select>
+    </td>
+    <td><textarea placeholder="예) 쇼츠 제작 인풋 완료" oninput="syncTaskHeader(${id}, this.value); autoResize(this)">${data.milestone||''}</textarea></td>
+    <td><textarea placeholder="예) 강의 4개 완강 + 실습 영상 1개" oninput="autoResize(this)">${data.output||''}</textarea></td>
+    <td class="deadline-cell"><input type="text" placeholder="4W1" value="${data.deadline||''}"></td>
+    <td class="feasibility-cell" style="text-align:center">
+      <span class="feas-badge ${FEASIBILITY_CLASS[0]}" onclick="cycleFeasibility(this)">${FEASIBILITY_LABEL[0]}</span>
+    </td>
+  `;
+  tbody.appendChild(tr);
+  setPriorityStyle(tr.querySelector('.priority-select'), id);
+  addTaskBlock(id, data.milestone || `마일스톤 ${id}`);
+}
+
+function setPriorityStyle(sel, id) {
+  const v = sel.value;
+  sel.style.background = v==='상' ? 'var(--red-bg)' : v==='중' ? 'var(--orange-bg)' : 'var(--faint)';
+  sel.style.color = v==='상' ? 'var(--red)' : v==='중' ? 'var(--orange)' : 'var(--muted)';
+  sel.style.borderColor = v==='상' ? '#E8A898' : v==='중' ? '#E8C28A' : 'var(--border)';
+}
+
+function cycleFeasibility(el) {
+  let cur = FEASIBILITY_CLASS.indexOf(el.className.replace('feas-badge','').trim());
+  if (cur < 0) cur = 0;
+  const next = (cur + 1) % FEASIBILITY.length;
+  el.className = `feas-badge ${FEASIBILITY_CLASS[next]}`;
+  el.textContent = FEASIBILITY_LABEL[next];
+  updateTotals();
+}
+
+function syncTaskHeader(id, val) {
+  const header = document.getElementById(`task-header-label-${id}`);
+  if (header) header.textContent = val || `마일스톤 ${id}`;
+}
+
+// ── TASK BLOCK ──
+function addTaskBlock(msId, label) {
+  taskRowCounters[msId] = 0;
+  const container = document.getElementById('taskBlocks');
+  const div = document.createElement('div');
+  div.className = 'task-section';
+  div.id = `task-block-${msId}`;
+  div.style.marginBottom = '8px';
+  div.innerHTML = `
+    <div class="task-section-header">
+      <span id="task-header-label-${msId}">${label || '마일스톤 ' + msId}</span>
+      <span>소계: <span id="task-subtotal-${msId}" style="font-family:var(--mono)">0h</span></span>
+    </div>
+    <div class="task-row routine-header" style="background:var(--faint);border-bottom:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">태스크</div>
+      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">예상 소요</div>
+      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">h</div>
+      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">비고</div>
+    </div>
+    <div id="task-rows-${msId}"></div>
+    <button class="task-add-btn" onclick="addTaskRow(${msId})">+ 태스크 추가</button>
+  `;
+  container.appendChild(div);
+  addTaskRow(msId);
+  addTaskRow(msId);
+}
+
+function addTaskRow(msId) {
+  taskRowCounters[msId]++;
+  const rowsContainer = document.getElementById(`task-rows-${msId}`);
+  const row = document.createElement('div');
+  row.className = 'task-row';
+  row.innerHTML = `
+    <input type="text" placeholder="태스크 명 (예: 강의 수강)">
+    <input type="text" class="task-divider" placeholder="예: 4강 × 1h" style="color:var(--muted)">
+    <input type="number" class="task-divider" placeholder="0" min="0" step="0.5"
+      oninput="recalcTaskSubtotal(${msId}); updateTotals()" style="font-family:var(--mono);font-weight:500">
+    <input type="text" class="task-divider" placeholder="메모" style="color:var(--muted)">
+  `;
+  rowsContainer.appendChild(row);
+}
+
+function recalcTaskSubtotal(msId) {
+  const rows = document.querySelectorAll(`#task-rows-${msId} .task-row`);
+  let sum = 0;
+  rows.forEach(row => {
+    const inp = row.querySelectorAll('input')[2];
+    if (inp) sum += parseFloat(inp.value) || 0;
+  });
+  const el = document.getElementById(`task-subtotal-${msId}`);
+  if (el) el.textContent = sum + 'h';
+  return sum;
+}
+
+// ── ROUTINE ROW ──
+function addRoutineRow(data = {}) {
+  routineCount++;
+  const container = document.getElementById('routineRows');
+  const row = document.createElement('div');
+  row.className = 'routine-row';
+  row.innerHTML = `
+    <input type="text" placeholder="예: 일본어 공부" value="${data.name||''}">
+    <input type="text" class="divider" placeholder="주4일 × 0.75h" value="${data.cycle||''}">
+    <input type="number" class="divider" placeholder="0" min="0" step="0.5"
+      value="${data.hours||''}" oninput="updateTotals()" style="font-family:var(--mono);font-weight:500">
+    <input type="text" class="divider" placeholder="" value="${data.note||''}">
+  `;
+  container.appendChild(row);
+}
+
+// ── TOTALS ──
+function updateTotals() {
+  let msTotal = 0;
+  let routineTotal = 0;
+  const breakdownEl = document.getElementById('totalBreakdown');
+  breakdownEl.innerHTML = '';
+
+  // milestone subtotals
+  for (let id = 1; id <= milestoneCount; id++) {
+    const block = document.getElementById(`task-block-${id}`);
+    if (!block) continue;
+    const label = document.getElementById(`task-header-label-${id}`);
+    const sub = recalcTaskSubtotal(id);
+    if (sub > 0) {
+      msTotal += sub;
+      const line = document.createElement('div');
+      line.className = 'total-item';
+      line.innerHTML = `<span class="name">${label ? label.textContent : '마일스톤 '+id}</span><span class="h">${sub}h</span>`;
+      breakdownEl.appendChild(line);
+    }
+  }
+
+  // routine total
+  const routineInputs = document.querySelectorAll('#routineRows .routine-row input[type="number"]');
+  routineInputs.forEach(inp => {
+    routineTotal += parseFloat(inp.value) || 0;
+  });
+  if (routineTotal > 0) {
+    const sep = document.createElement('div');
+    sep.className = 'total-item';
+    sep.innerHTML = `<span class="name" style="color:var(--muted)">루틴 합계</span><span class="h">${routineTotal}h</span>`;
+    breakdownEl.appendChild(sep);
+  }
+
+  const total = msTotal + routineTotal;
+  const cap = parseFloat(document.getElementById('capacity').value) || 44;
+
+  document.getElementById('totalHours').textContent = total + 'h';
+  document.getElementById('capInfo').textContent = `가용 ${cap}h 기준`;
+
+  const diff = total - cap;
+  const statusEl = document.getElementById('totalStatus');
+  const bigEl = document.getElementById('totalHours');
+  if (total === 0) {
+    statusEl.textContent = '—';
+    bigEl.style.color = 'var(--bg)';
+  } else if (diff > 2) {
+    statusEl.textContent = `+${diff.toFixed(1)}h 초과 → 항목 조정 필요`;
+    bigEl.style.color = '#E8A898';
+  } else if (diff >= -2) {
+    statusEl.textContent = `✓ 적정 배분`;
+    bigEl.style.color = '#9FE1CB';
+  } else {
+    statusEl.textContent = `${Math.abs(diff).toFixed(1)}h 여유 → 추가 투입 가능`;
+    bigEl.style.color = 'var(--bg)';
+  }
+
+  if (breakdownEl.children.length === 0) {
+    breakdownEl.innerHTML = '<div class="total-item" style="color:var(--muted);font-size:11px;font-family:var(--mono)">마일스톤과 루틴을 입력하면 자동 계산됩니다</div>';
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// ── INIT: 빈 행 3개 + 루틴 3개 ──
+window.onload = () => {
+  addMilestoneRow();
+  addMilestoneRow();
+  addMilestoneRow();
+
+  addRoutineRow({ name:'경제/경영 이론 학습', cycle:'주3일 × 1.5h', hours:4.5 });
+  addRoutineRow({ name:'일본어 상시 공부', cycle:'주4일 × 0.75h', hours:3 });
+  addRoutineRow({ name:'상시 투자 운영', cycle:'매일 × 0.5h', hours:2.5 });
+  updateTotals();
+};
+</script>
+</body>
+</html>
