@@ -6,784 +6,690 @@
 <title>Weekly Planner</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap');
-
   :root {
-    --bg: #F5F3EE;
-    --surface: #FFFFFF;
-    --border: #D8D4CC;
-    --text: #1A1916;
-    --muted: #9A968E;
-    --faint: #ECEAE5;
-    --red: #C4432A;
-    --red-bg: #FDF0ED;
-    --orange: #B86A1A;
-    --orange-bg: #FDF4E7;
-    --green: #2D6A4A;
-    --green-bg: #EAF4EE;
-    --mono: 'DM Mono', monospace;
-    --sans: 'Noto Sans KR', sans-serif;
+    --bg:#F5F3EE;--surface:#FFFFFF;--border:#D8D4CC;--text:#1A1916;--muted:#9A968E;--faint:#ECEAE5;
+    --red:#C4432A;--red-bg:#FDF0ED;--orange:#B86A1A;--orange-bg:#FDF4E7;--green:#2D6A4A;--green-bg:#EAF4EE;
+    --mono:'DM Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+    --slot-h:48px;
   }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:var(--sans);color:var(--text);font-size:13px;line-height:1.6;padding:32px 36px;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--text);padding-bottom:14px;margin-bottom:28px;}
+  .page-header h1{font-family:var(--mono);font-size:16px;font-weight:500;letter-spacing:1px;text-transform:uppercase;}
+  .page-header .sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;}
+  .meta-fields{display:flex;gap:20px;align-items:flex-end;}
+  .meta-field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px;}
+  .meta-field input{font-family:var(--mono);font-size:13px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);padding:2px 0;width:100px;outline:none;}
+  .meta-field input:focus{border-bottom-color:var(--text);}
 
-  body {
-    background: var(--bg);
-    font-family: var(--sans);
-    color: var(--text);
-    font-size: 13px;
-    line-height: 1.6;
-    padding: 40px 36px;
-  }
+  .week-bar{display:flex;align-items:center;gap:10px;margin-bottom:24px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);}
+  .week-bar .wlabel{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-right:4px;}
+  #weekTabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .week-tab{font-family:var(--mono);font-size:11px;padding:4px 12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:2px;}
+  .week-tab:hover{background:var(--faint);}
+  .week-tab.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+  .week-add-btn{font-family:var(--mono);font-size:11px;padding:4px 10px;border:1px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:2px;}
+  .week-add-btn:hover{color:var(--text);border-color:var(--text);}
+  .save-ind{font-family:var(--mono);font-size:10px;color:var(--green);margin-left:auto;opacity:0;transition:opacity .5s;}
+  .save-ind.show{opacity:1;}
 
-  /* ── HEADER ── */
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 2px solid var(--text);
-    padding-bottom: 14px;
-    margin-bottom: 32px;
-  }
-  .page-header h1 {
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .page-header .sub {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 3px;
-  }
-  .meta-fields {
-    display: flex;
-    gap: 24px;
-    align-items: flex-end;
-  }
-  .meta-field label {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    display: block;
-    margin-bottom: 4px;
-  }
-  .meta-field input {
-    font-family: var(--mono);
-    font-size: 13px;
-    border: none;
-    border-bottom: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    padding: 2px 0;
-    width: 110px;
-    outline: none;
-  }
-  .meta-field input:focus { border-bottom-color: var(--text); }
+  .step-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .step-label strong{color:var(--text);font-weight:500;}
+  .section{margin-bottom:32px;}
 
-  /* ── STEP LABELS ── */
-  .step-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .step-label strong {
-    color: var(--text);
-    font-weight: 500;
-  }
+  /* MS TABLE */
+  .ms-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);}
+  .ms-table thead tr{background:var(--text);color:var(--bg);}
+  .ms-table thead th{font-family:var(--mono);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;text-align:left;border-right:1px solid rgba(255,255,255,.1);}
+  .ms-table thead th:last-child{border-right:none;}
+  .ms-table tbody tr{border-bottom:1px solid var(--border);}
+  .ms-table tbody tr:last-child{border-bottom:none;}
+  .ms-table td{padding:9px 12px;vertical-align:top;border-right:1px solid var(--border);}
+  .ms-table td:last-child{border-right:none;}
+  .ms-table td input,.ms-table td select,.ms-table td textarea{font-family:var(--sans);font-size:12px;border:none;background:transparent;color:var(--text);width:100%;outline:none;resize:none;}
+  .ms-table td textarea{min-height:34px;line-height:1.5;}
+  .ms-table td input::placeholder,.ms-table td textarea::placeholder{color:var(--muted);font-size:11px;}
+  .ms-table td select{cursor:pointer;-webkit-appearance:none;appearance:none;}
+  .ms-table td.pc{width:60px;}.ms-table td.dc{width:78px;}.ms-table td.dlc{width:68px;}.ms-table td.fc{width:76px;}
+  select.psel{font-family:var(--mono);font-size:11px;font-weight:500;padding:2px 4px;border-radius:2px;cursor:pointer;border:1px solid var(--border);background:var(--surface);}
+  .fb{font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:2px;cursor:pointer;border:1px solid var(--border);background:var(--faint);color:var(--muted);display:inline-block;user-select:none;}
+  .fb.ok{background:var(--green-bg);color:var(--green);border-color:#B0D4C0;}
+  .fb.risky{background:var(--orange-bg);color:var(--orange);border-color:#E8C28A;}
+  .fb.no{background:var(--red-bg);color:var(--red);border-color:#E8A898;}
 
-  /* ── SECTION BLOCK ── */
-  .section { margin-bottom: 36px; }
+  /* TASK BLOCKS — 4 cols: 태스크명 | 예상소요h | 실제소요h */
+  .task-section{margin-bottom:8px;background:var(--surface);border:1px solid var(--border);}
+  .tsh{background:var(--faint);padding:7px 14px;font-family:var(--mono);font-size:10px;font-weight:500;color:var(--muted);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .tsh span{font-size:11px;color:var(--text);font-weight:500;}
+  .tch{display:grid;grid-template-columns:1fr 88px 88px;background:var(--faint);border-bottom:1px solid var(--border);}
+  .tch div{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px;border-right:1px solid var(--border);}
+  .tch div:last-child{border-right:none;}
+  .trow{display:grid;grid-template-columns:1fr 88px 88px;align-items:center;border-bottom:1px solid var(--border);}
+  .trow:last-child{border-bottom:none;}
+  .trow input{font-family:var(--sans);font-size:12px;border:none;background:transparent;color:var(--text);padding:7px 12px;outline:none;width:100%;border-right:1px solid var(--border);}
+  .trow input:last-child{border-right:none;}
+  .trow input::placeholder{color:var(--muted);font-size:11px;}
+  .trow input[type="number"]{font-family:var(--mono);font-weight:500;}
+  .trow .actual-col{background:#FAFAF8;}
+  .tab-btn{display:block;width:100%;padding:6px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:transparent;border:none;border-top:1px dashed var(--border);cursor:pointer;text-align:left;letter-spacing:.5px;}
+  .tab-btn:hover{background:var(--faint);color:var(--text);}
 
-  /* ── CAPACITY STRIP ── */
-  .capacity-strip {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-bottom: 32px;
-  }
-  .cap-cell {
-    background: var(--surface);
-    padding: 10px 14px;
-  }
-  .cap-cell .clabel {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 5px;
-  }
-  .cap-cell input {
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 500;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    width: 100%;
-    outline: none;
-  }
-  .cap-cell input::placeholder { color: var(--faint); }
-  .cap-cell .chelp {
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
+  /* ROUTINE — 예상소요 + 실제소요 */
+  .routine-block{background:var(--surface);border:1px solid var(--border);}
+  .rrow{display:grid;grid-template-columns:1fr 130px 88px 88px;border-bottom:1px solid var(--border);align-items:center;}
+  .rrow:last-child{border-bottom:none;}
+  .rrow input{font-family:var(--sans);font-size:12px;padding:8px 12px;border:none;background:transparent;color:var(--text);outline:none;width:100%;border-right:1px solid var(--border);}
+  .rrow input:last-child{border-right:none;}
+  .rrow input[type="number"]{font-family:var(--mono);font-weight:500;}
+  .rrow input::placeholder{color:var(--muted);font-size:11px;}
+  .rrow .actual-col{background:#FAFAF8;}
+  .rhdr{background:var(--faint);border-bottom:1px solid var(--border);}
+  .rhdr div{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px;border-right:1px solid var(--border);display:inline-block;}
+  .rhdr div:last-child{border-right:none;}
 
-  /* ── MILESTONE TABLE ── */
-  .ms-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
-  .ms-table thead tr {
-    background: var(--text);
-    color: var(--bg);
-  }
-  .ms-table thead th {
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 8px 12px;
-    text-align: left;
-    border-right: 1px solid rgba(255,255,255,0.1);
-  }
-  .ms-table thead th:last-child { border-right: none; }
+  /* TOTAL */
+  .total-block{margin-top:28px;display:grid;grid-template-columns:1fr 260px;gap:1px;background:var(--border);border:1px solid var(--border);}
+  .total-left{background:var(--surface);padding:14px 18px;}
+  .total-left .lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;}
+  .ti{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px dashed var(--border);}
+  .ti:last-child{border-bottom:none;}
+  .ti .nm{color:var(--muted);}.ti .hh{font-family:var(--mono);font-weight:500;}
+  .total-right{background:var(--text);color:var(--bg);padding:14px 18px;display:flex;flex-direction:column;justify-content:space-between;}
+  .total-right .lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;opacity:.5;margin-bottom:4px;}
+  .total-right .big{font-family:var(--mono);font-size:34px;font-weight:500;line-height:1;margin-bottom:4px;}
+  .total-right .st{font-family:var(--mono);font-size:11px;opacity:.6;}
+  .total-right .ci{font-family:var(--mono);font-size:10px;opacity:.4;margin-top:8px;}
 
-  .ms-table tbody tr {
-    border-bottom: 1px solid var(--border);
-  }
-  .ms-table tbody tr:last-child { border-bottom: none; }
-  .ms-table tbody tr:hover { background: var(--faint); }
+  .notes-block{margin-top:20px;background:var(--surface);border:1px solid var(--border);padding:12px 16px;}
+  .notes-block .nl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px;}
+  .notes-block textarea{font-family:var(--sans);font-size:12px;width:100%;border:none;background:transparent;color:var(--text);resize:none;outline:none;min-height:52px;line-height:1.7;}
+  .notes-block textarea::placeholder{color:var(--muted);}
 
-  .ms-table td {
-    padding: 10px 12px;
-    vertical-align: top;
-    border-right: 1px solid var(--border);
-  }
-  .ms-table td:last-child { border-right: none; }
+  .add-btn{display:block;width:100%;margin-top:1px;padding:7px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-top:1px dashed var(--border);cursor:pointer;text-align:left;letter-spacing:.5px;}
+  .add-btn:hover{background:var(--faint);color:var(--text);}
 
-  .ms-table td input,
-  .ms-table td select,
-  .ms-table td textarea {
-    font-family: var(--sans);
-    font-size: 12px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    width: 100%;
-    outline: none;
-    resize: none;
-  }
-  .ms-table td textarea { min-height: 36px; line-height: 1.5; }
-  .ms-table td input::placeholder,
-  .ms-table td textarea::placeholder { color: var(--muted); font-size: 11px; }
+  /* STEP 4 */
+  .s4wrap{margin-top:36px;}
+  .s4label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:16px;}
+  .s4label strong{color:var(--text);}
+  .export-all-btn{font-family:var(--mono);font-size:10px;padding:4px 12px;background:#4285F4;color:white;border:none;border-radius:2px;cursor:pointer;letter-spacing:.5px;}
+  .export-all-btn:hover{background:#3367D6;}
 
-  .ms-table td select {
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .ms-table td.priority-cell { width: 64px; }
-  .ms-table td.domain-cell { width: 80px; }
-  .ms-table td.deadline-cell { width: 72px; }
-  .ms-table td.hours-cell { width: 56px; }
-  .ms-table td.feasibility-cell { width: 80px; }
+  .pool-section-label{font-family:var(--mono);font-size:9px;color:var(--muted);padding:5px 12px;background:var(--faint);border:1px solid var(--border);border-bottom:none;letter-spacing:.5px;}
+  .pool-section-label span{color:var(--text);font-weight:500;}
+  .task-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:12px;background:var(--surface);border:1px solid var(--border);border-bottom:none;align-content:flex-start;}
+  .pool-empty{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
-  .pill {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 2px;
-    font-weight: 500;
-  }
-  .pill-high { background: var(--red-bg); color: var(--red); }
-  .pill-mid { background: var(--orange-bg); color: var(--orange); }
-  .pill-low { background: var(--faint); color: var(--muted); }
+  .task-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border:1.5px solid;border-radius:3px;cursor:grab;user-select:none;font-size:12px;transition:box-shadow .15s;}
+  .task-chip:hover{box-shadow:0 2px 6px rgba(0,0,0,.1);}
+  .task-chip.dragging{opacity:.3;}
+  .chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;opacity:.7;background:currentColor;}
+  .chip-name{color:var(--text);font-size:12px;}
+  .chip-h{font-family:var(--mono);font-size:10px;opacity:.65;}
+  /* routine chip has dashed border */
+  .task-chip.routine-chip{border-style:dashed;}
 
-  select.priority-select {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 500;
-    padding: 2px 4px;
-    border-radius: 2px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--surface);
-  }
+  .cal-outer{background:var(--surface);border:1px solid var(--border);overflow-x:auto;}
+  .cal-grid{display:grid;grid-template-columns:44px repeat(5,1fr);min-width:560px;}
+  .cal-corner,.cal-day-hdr{background:var(--faint);border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+  .cal-day-hdr{font-family:var(--mono);font-size:10px;font-weight:500;text-align:center;padding:7px 4px;color:var(--muted);}
+  .cal-day-hdr:last-child{border-right:none;}
+  .cal-time{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:right;padding:2px 5px 0 0;height:var(--slot-h);border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);}
+  .cal-slot{height:var(--slot-h);border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:2px;position:relative;transition:background .1s;}
+  .cal-slot:last-child{border-right:none;}
+  .cal-slot.drag-over{background:#EAF4EE;}
 
-  /* ── FEASIBILITY BADGE ── */
-  .feas-badge {
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 2px;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--faint);
-    color: var(--muted);
-    display: inline-block;
-    user-select: none;
-    transition: background 0.15s;
-  }
-  .feas-badge.ok { background: var(--green-bg); color: var(--green); border-color: #B0D4C0; }
-  .feas-badge.risky { background: var(--orange-bg); color: var(--orange); border-color: #E8C28A; }
-  .feas-badge.no { background: var(--red-bg); color: var(--red); border-color: #E8A898; }
+  .placed-block{position:absolute;left:2px;right:2px;top:2px;border:1.5px solid;border-radius:2px;padding:3px 6px;font-size:11px;overflow:hidden;z-index:10;display:flex;flex-direction:column;justify-content:space-between;}
+  .placed-block.routine-placed{border-style:dashed;}
+  .pb-top{display:flex;align-items:center;gap:4px;}
+  .pb-dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7;flex-shrink:0;}
+  .pb-name{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
+  .pb-h{font-family:var(--mono);font-size:9px;opacity:.7;flex-shrink:0;}
+  .pb-remove{font-size:13px;line-height:1;cursor:pointer;opacity:.5;padding:0 1px;color:var(--text);}
+  .pb-remove:hover{opacity:1;}
+  .pb-bottom{display:flex;align-items:center;gap:4px;margin-top:2px;}
+  .gcal-btn{font-family:var(--mono);font-size:9px;background:#4285F4;color:white;border:none;padding:1px 5px;border-radius:2px;cursor:pointer;}
+  .gcal-btn:hover{background:#3367D6;}
 
-  /* ── TASK BREAKDOWN ── */
-  .task-section {
-    margin-top: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
-  .task-section-header {
-    background: var(--faint);
-    padding: 7px 14px;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .task-section-header span {
-    font-size: 11px;
-    color: var(--text);
-    font-weight: 500;
-  }
-  .task-row {
-    display: grid;
-    grid-template-columns: 1fr 80px 60px 100px;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .task-row:last-child { border-bottom: none; }
-  .task-row input, .task-row select {
-    font-family: var(--sans);
-    font-size: 12px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    padding: 8px 12px;
-    outline: none;
-    width: 100%;
-  }
-  .task-row input::placeholder { color: var(--muted); font-size: 11px; }
-  .task-row .task-divider {
-    border-left: 1px solid var(--border);
-  }
-  .task-add-btn {
-    display: block;
-    width: 100%;
-    padding: 7px 14px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    background: transparent;
-    border: none;
-    border-top: 1px dashed var(--border);
-    cursor: pointer;
-    text-align: left;
-    letter-spacing: 0.5px;
-  }
-  .task-add-btn:hover { background: var(--faint); color: var(--text); }
-
-  /* ── ROUTINE BLOCK ── */
-  .routine-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-  }
-  .routine-row {
-    display: grid;
-    grid-template-columns: 1fr 120px 80px 80px;
-    border-bottom: 1px solid var(--border);
-    align-items: center;
-  }
-  .routine-row:last-child { border-bottom: none; }
-  .routine-row input {
-    font-family: var(--sans);
-    font-size: 12px;
-    padding: 9px 12px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    outline: none;
-    width: 100%;
-  }
-  .routine-row input::placeholder { color: var(--muted); font-size: 11px; }
-  .routine-row .divider { border-left: 1px solid var(--border); }
-  .routine-header {
-    background: var(--faint);
-    border-bottom: 1px solid var(--border);
-  }
-  .routine-header div {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 6px 12px;
-  }
-
-  /* ── TOTAL CALCULATOR ── */
-  .total-block {
-    margin-top: 32px;
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-  }
-  .total-left {
-    background: var(--surface);
-    padding: 16px 18px;
-  }
-  .total-left .label {
-    font-family: var(--mono);
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .total-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    padding: 4px 0;
-    border-bottom: 1px dashed var(--border);
-  }
-  .total-item .name { color: var(--muted); }
-  .total-item .h { font-family: var(--mono); font-weight: 500; }
-  .total-right {
-    background: var(--text);
-    color: var(--bg);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .total-right .label {
-    font-family: var(--mono);
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    opacity: 0.5;
-    margin-bottom: 6px;
-  }
-  .total-right .big {
-    font-family: var(--mono);
-    font-size: 36px;
-    font-weight: 500;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .total-right .status {
-    font-family: var(--mono);
-    font-size: 11px;
-    opacity: 0.6;
-  }
-  .total-right .cap-info {
-    font-family: var(--mono);
-    font-size: 10px;
-    opacity: 0.4;
-    margin-top: 10px;
-  }
-
-  /* ── NOTES ── */
-  .notes-block {
-    margin-top: 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 14px 16px;
-  }
-  .notes-block .nlabel {
-    font-family: var(--mono);
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .notes-block textarea {
-    font-family: var(--sans);
-    font-size: 12px;
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    resize: none;
-    outline: none;
-    min-height: 56px;
-    line-height: 1.7;
-  }
-  .notes-block textarea::placeholder { color: var(--muted); }
-
-  /* ── ADD ROW BTN ── */
-  .add-row-btn {
-    display: block;
-    width: 100%;
-    margin-top: 1px;
-    padding: 8px 14px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-top: 1px dashed var(--border);
-    cursor: pointer;
-    text-align: left;
-    letter-spacing: 0.5px;
-  }
-  .add-row-btn:hover { background: var(--faint); color: var(--text); }
-
-  @media print {
-    body { background: white; padding: 20px; }
-    input, textarea, select { -webkit-print-color-adjust: exact; }
-  }
+  .dc-0{background:#EEF3FD;border-color:#7BAAF7;color:#1A56B8;}
+  .dc-1{background:#FDE8E8;border-color:#E57373;color:#B71C1C;}
+  .dc-2{background:#FFF3E0;border-color:#FFB74D;color:#E65100;}
+  .dc-3{background:#E8F5E9;border-color:#66BB6A;color:#1B5E20;}
+  .dc-4{background:#F3E5F5;border-color:#AB47BC;color:#4A148C;}
+  .dc-5{background:#E0F7FA;border-color:#26C6DA;color:#006064;}
+  .dc-6{background:var(--faint);border-color:var(--border);color:var(--muted);}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════ -->
 <div class="page-header">
   <div>
     <h1>Weekly Planner</h1>
-    <div class="sub">마일스톤 → 아웃풋 → 현실성 검토 → 시간 배분</div>
+    <div class="sub">마일스톤 → 아웃풋 → 현실성 검토 → 시간 배분 → 캘린더 배치 → 리뷰</div>
   </div>
   <div class="meta-fields">
-    <div class="meta-field">
-      <label>Week</label>
-      <input type="text" placeholder="4W1" id="weekInput" oninput="updateTotals()">
-    </div>
-    <div class="meta-field">
-      <label>기간</label>
-      <input type="text" placeholder="4/1 ~ 4/5">
-    </div>
-    <div class="meta-field">
-      <label>가용시간</label>
-      <input type="number" placeholder="44" id="capacity" value="44" oninput="updateTotals()"> h
-    </div>
+    <div class="meta-field"><label>Week</label><input type="text" placeholder="4W1" id="weekKey" oninput="onWeekKeyInput(this.value)"></div>
+    <div class="meta-field"><label>기간</label><input type="text" placeholder="4/1 ~ 4/5" id="weekRange" oninput="debounceSave()"></div>
+    <div class="meta-field"><label>가용시간</label><input type="number" placeholder="44" id="capacity" value="44" oninput="updateTotals();debounceSave()"> h</div>
   </div>
 </div>
 
+<div class="week-bar">
+  <span class="wlabel">주차</span>
+  <div id="weekTabs"></div>
+  <button class="week-add-btn" onclick="addWeek()">+ 새 주차</button>
+  <span class="save-ind" id="saveInd">✓ 저장됨</span>
+</div>
 
-<!-- ══════════════════════════════════════════
-     STEP 1 — 마일스톤 + 아웃풋 + 희망마감
-══════════════════════════════════════════ -->
+<!-- STEP 1 -->
 <div class="section">
-  <div class="step-label"><strong>STEP 1</strong> — 이번 주 마일스톤 정의: 무엇을 완성할 것인가</div>
-
-  <table class="ms-table" id="milestoneTable">
-    <thead>
-      <tr>
-        <th class="priority-cell">우선도</th>
-        <th class="domain-cell">영역</th>
-        <th style="min-width:140px">마일스톤 (무엇을)</th>
-        <th style="min-width:160px">아웃풋 (완성의 증거)</th>
-        <th class="deadline-cell">희망마감</th>
-        <th class="feasibility-cell">현실성</th>
-      </tr>
-    </thead>
-    <tbody id="milestoneBody">
-      <!-- rows injected by JS -->
-    </tbody>
+  <div class="step-label"><strong>STEP 1</strong> — 마일스톤 정의</div>
+  <table class="ms-table">
+    <thead><tr>
+      <th class="pc">우선도</th><th class="dc">영역</th>
+      <th style="min-width:130px">마일스톤</th>
+      <th style="min-width:150px">아웃풋</th>
+      <th class="dlc">희망마감</th><th class="fc">현실성</th>
+    </tr></thead>
+    <tbody id="msBody"></tbody>
   </table>
-  <button class="add-row-btn" onclick="addMilestoneRow()">+ 마일스톤 추가</button>
+  <button class="add-btn" onclick="addMS()">+ 마일스톤 추가</button>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     STEP 2 — 태스크 역산 + 시간 견적
-══════════════════════════════════════════ -->
+<!-- STEP 2 -->
 <div class="section">
-  <div class="step-label"><strong>STEP 2</strong> — 태스크 역산: 마일스톤별 필요 태스크와 시간 견적</div>
-
-  <div id="taskBlocks">
-    <!-- task blocks injected by JS -->
-  </div>
+  <div class="step-label"><strong>STEP 2</strong> — 태스크 역산</div>
+  <div id="taskBlocks"></div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     STEP 3 — 루틴 고정 블록
-══════════════════════════════════════════ -->
+<!-- STEP 3 -->
 <div class="section">
-  <div class="step-label"><strong>STEP 3</strong> — 고정 루틴: 매주 나가는 시간 (건드리지 않는 블록)</div>
-
+  <div class="step-label"><strong>STEP 3</strong> — 고정 루틴</div>
   <div class="routine-block">
-    <div class="routine-row routine-header">
-      <div>루틴 항목</div>
-      <div class="divider">주기 / 단위</div>
-      <div class="divider">h/주</div>
-      <div class="divider">비고</div>
+    <div class="rrow rhdr">
+      <div>루틴 항목</div><div>주기 (예: 주3일×1.5h)</div><div>예상 소요</div><div>실제 소요</div>
     </div>
-    <div id="routineRows">
-      <!-- routine rows injected by JS -->
-    </div>
+    <div id="routineRows"></div>
   </div>
-  <button class="add-row-btn" onclick="addRoutineRow()">+ 루틴 추가</button>
+  <button class="add-btn" onclick="addRoutine()">+ 루틴 추가</button>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     TOTAL
-══════════════════════════════════════════ -->
+<!-- TOTAL -->
 <div class="total-block">
   <div class="total-left">
-    <div class="label">시간 합산</div>
-    <div id="totalBreakdown">
-      <div class="total-item" style="color:var(--muted);font-size:11px;font-family:var(--mono)">마일스톤과 루틴을 입력하면 자동 계산됩니다</div>
-    </div>
+    <div class="lbl">시간 합산 (예상 소요 기준)</div>
+    <div id="totalBreakdown"><div style="color:var(--muted);font-size:11px;font-family:var(--mono)">입력하면 자동 계산됩니다</div></div>
   </div>
   <div class="total-right">
-    <div>
-      <div class="label">Total</div>
-      <div class="big" id="totalHours">0h</div>
-      <div class="status" id="totalStatus">—</div>
-    </div>
-    <div class="cap-info" id="capInfo">가용 44h 기준</div>
+    <div><div class="lbl">Total</div><div class="big" id="totalH">0h</div><div class="st" id="totalSt">—</div></div>
+    <div class="ci" id="capInfo">가용 44h 기준</div>
   </div>
 </div>
 
-
-<!-- ══════════════════════════════════════════
-     NOTES
-══════════════════════════════════════════ -->
+<!-- NOTES -->
 <div class="notes-block">
-  <div class="nlabel">이번 주 메모 / 현실성 검토 후 조정사항</div>
-  <textarea placeholder="현실성 검토 결과, 이월 항목, 특이사항 등 자유 기록..."></textarea>
+  <div class="nl">이번 주 메모 / 현실성 검토 후 조정사항</div>
+  <textarea id="notesTA" placeholder="현실성 검토 결과, 이월 항목, 특이사항 등 자유 기록..." oninput="debounceSave()"></textarea>
 </div>
 
+<!-- STEP 4 -->
+<div class="s4wrap">
+  <div class="s4label">
+    <span><strong>STEP 4</strong> — 캘린더 배치</span>
+    <button class="export-all-btn" onclick="exportAllToGcal()">↗ 전체 구글 캘린더 내보내기</button>
+  </div>
+
+  <div class="pool-section-label">태스크 블록 — <span>드래그해서 캘린더에 배치</span> &nbsp;·&nbsp; 실선: 태스크 &nbsp;·&nbsp; 점선: 루틴</div>
+  <div class="task-pool" id="taskPool">
+    <span class="pool-empty" id="poolEmpty">Step 2 태스크 또는 Step 3 루틴을 입력하면 블록이 생성됩니다</span>
+  </div>
+  <div class="cal-outer"><div class="cal-grid" id="calGrid"></div></div>
+</div>
 
 <script>
-// ── DATA ──
-const DOMAINS = ['수익창출','브랜딩','레버리지','사업준비','투자운영','이직준비','기타'];
-const PRIORITIES = ['상','중','하'];
-const FEASIBILITY = ['검토전','가능','위험','불가'];
-const FEASIBILITY_CLASS = ['','ok','risky','no'];
-const FEASIBILITY_LABEL = ['?','✓ 가능','△ 위험','✕ 불가'];
+const DOMAINS=['수익창출','브랜딩','레버리지','사업준비','투자운영','이직준비','기타'];
+const DAYS=['월','화','수','목','금'];
+const HOURS=Array.from({length:15},(_,i)=>i+8);
+const SLOT_H=48;
+const PRI=['상','중','하'];
+const FC=['','ok','risky','no'];
+const FL=['?','✓ 가능','△ 위험','✕ 불가'];
+const STORAGE_KEY='wplanner_v3';
 
-let milestoneCount = 0;
-let taskRowCounters = {};
-let routineCount = 0;
+let msCount=0,taskCounters={},dragData=null;
+let currentWeek='4W1';
+let weeks={};
+let saveTimer=null;
 
-// ── MILESTONE ROW ──
-function addMilestoneRow(data = {}) {
-  milestoneCount++;
-  const id = milestoneCount;
-  const tbody = document.getElementById('milestoneBody');
-  const tr = document.createElement('tr');
-  tr.id = `ms-row-${id}`;
-  tr.innerHTML = `
-    <td class="priority-cell">
-      <select class="priority-select" onchange="setPriorityStyle(this, ${id})">
-        ${PRIORITIES.map(p => `<option value="${p}" ${data.priority===p?'selected':''}>${p}</option>`).join('')}
-      </select>
-    </td>
-    <td class="domain-cell">
-      <select style="font-family:var(--mono);font-size:11px;border:1px solid var(--border);background:var(--surface);padding:2px 4px;border-radius:2px;width:100%;outline:none;cursor:pointer">
-        ${DOMAINS.map(d => `<option ${data.domain===d?'selected':''}>${d}</option>`).join('')}
-      </select>
-    </td>
-    <td><textarea placeholder="예) 쇼츠 제작 인풋 완료" oninput="syncTaskHeader(${id}, this.value); autoResize(this)">${data.milestone||''}</textarea></td>
-    <td><textarea placeholder="예) 강의 4개 완강 + 실습 영상 1개" oninput="autoResize(this)">${data.output||''}</textarea></td>
-    <td class="deadline-cell"><input type="text" placeholder="4W1" value="${data.deadline||''}"></td>
-    <td class="feasibility-cell" style="text-align:center">
-      <span class="feas-badge ${FEASIBILITY_CLASS[0]}" onclick="cycleFeasibility(this)">${FEASIBILITY_LABEL[0]}</span>
-    </td>
-  `;
-  tbody.appendChild(tr);
-  setPriorityStyle(tr.querySelector('.priority-select'), id);
-  addTaskBlock(id, data.milestone || `마일스톤 ${id}`);
+// ── STORAGE ──
+function loadAllWeeks(){
+  try{const s=localStorage.getItem(STORAGE_KEY);if(s)weeks=JSON.parse(s);}catch(e){}
+  if(Object.keys(weeks).length===0)
+    weeks={'4W1':{key:'4W1',range:'4/1 ~ 4/5',capacity:44,milestones:[],routines:defaultRoutines(),notes:'',placements:[]}};
 }
 
-function setPriorityStyle(sel, id) {
-  const v = sel.value;
-  sel.style.background = v==='상' ? 'var(--red-bg)' : v==='중' ? 'var(--orange-bg)' : 'var(--faint)';
-  sel.style.color = v==='상' ? 'var(--red)' : v==='중' ? 'var(--orange)' : 'var(--muted)';
-  sel.style.borderColor = v==='상' ? '#E8A898' : v==='중' ? '#E8C28A' : 'var(--border)';
+function defaultRoutines(){
+  return [
+    {name:'경제/경영 이론 학습',cycle:'주3일×1.5h',estH:4.5,actH:''},
+    {name:'일본어 상시 공부',cycle:'주4일×0.75h',estH:3,actH:''},
+    {name:'상시 투자 운영',cycle:'매일×0.5h',estH:2.5,actH:''}
+  ];
 }
 
-function cycleFeasibility(el) {
-  let cur = FEASIBILITY_CLASS.indexOf(el.className.replace('feas-badge','').trim());
-  if (cur < 0) cur = 0;
-  const next = (cur + 1) % FEASIBILITY.length;
-  el.className = `feas-badge ${FEASIBILITY_CLASS[next]}`;
-  el.textContent = FEASIBILITY_LABEL[next];
+function saveAll(){
+  collectCurrentState();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(weeks));}catch(e){}
+  const ind=document.getElementById('saveInd');
+  ind.classList.add('show');
+  setTimeout(()=>ind.classList.remove('show'),1800);
+}
+
+function debounceSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveAll,800);}
+
+function renderWeekTabs(){
+  const tabs=document.getElementById('weekTabs');
+  tabs.innerHTML='';
+  Object.keys(weeks).forEach(k=>{
+    const btn=document.createElement('button');
+    btn.className='week-tab'+(k===currentWeek?' active':'');
+    btn.textContent=k;
+    btn.onclick=()=>switchWeek(k);
+    tabs.appendChild(btn);
+  });
+}
+
+function switchWeek(k){collectCurrentState();currentWeek=k;loadWeek(k);renderWeekTabs();}
+
+function addWeek(){
+  const key=prompt('새 주차 이름 (예: 4W2)');
+  if(!key||!key.trim())return;
+  const k=key.trim();
+  if(!weeks[k])weeks[k]={key:k,range:'',capacity:44,milestones:[],routines:defaultRoutines(),notes:'',placements:[]};
+  switchWeek(k);renderWeekTabs();
+}
+
+function onWeekKeyInput(val){
+  const newKey=val.trim();
+  if(!newKey||newKey===currentWeek)return;
+  if(weeks[newKey])return; // already exists
+  const data=weeks[currentWeek];
+  weeks[newKey]=data;
+  data.key=newKey;
+  delete weeks[currentWeek];
+  currentWeek=newKey;
+  renderWeekTabs();
+  debounceSave();
+}
+
+function debounceSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveAll,800);}
+
+// ── COLLECT ──
+function collectCurrentState(){
+  const w=weeks[currentWeek];if(!w)return;
+  // key는 onWeekKeyInput에서 별도 관리 — 여기선 덮어쓰지 않음
+  w.range=document.getElementById('weekRange').value;
+  w.capacity=parseFloat(document.getElementById('capacity').value)||44;
+  w.notes=document.getElementById('notesTA').value;
+
+  w.milestones=[];
+  for(let id=1;id<=msCount;id++){
+    const row=document.getElementById(`ms-${id}`);if(!row)continue;
+    const tasks=[];
+    document.querySelectorAll(`#trows-${id} .trow`).forEach(tr=>{
+      const ins=tr.querySelectorAll('input');
+      tasks.push({name:ins[0]?.value||'',estH:parseFloat(ins[1]?.value)||0,actH:ins[2]?.value||''});
+    });
+    w.milestones.push({
+      priority:row.querySelector('.psel')?.value||'상',
+      domainIdx:parseInt(row.querySelector(`#msd-${id}`)?.value)||0,
+      milestone:row.querySelector('.ms-name')?.value||'',
+      output:row.querySelector('.ms-output')?.value||'',
+      deadline:row.querySelector('.ms-deadline')?.value||'',
+      feasibility:row.querySelector('.fb')?.className.replace('fb','').trim()||'',
+      tasks
+    });
+  }
+
+  w.routines=[];
+  document.querySelectorAll('#routineRows .rrow').forEach(rr=>{
+    const ins=rr.querySelectorAll('input');
+    w.routines.push({name:ins[0]?.value||'',cycle:ins[1]?.value||'',estH:parseFloat(ins[2]?.value)||0,actH:ins[3]?.value||''});
+  });
+
+  w.placements=[];
+  document.querySelectorAll('.cal-slot .placed-block').forEach(pb=>{
+    const slot=pb.closest('.cal-slot');
+    w.placements.push({name:pb.dataset.name,hours:parseFloat(pb.dataset.hours)||0,domIdx:parseInt(pb.dataset.domIdx)||0,msId:parseInt(pb.dataset.msId)||0,day:parseInt(slot.dataset.day),hour:parseInt(slot.dataset.hour),isRoutine:pb.dataset.isRoutine==='1'});
+  });
+}
+
+// ── LOAD ──
+function loadWeek(k){
+  const w=weeks[k];if(!w)return;
+  currentWeek=k;
+  document.getElementById('weekKey').value=w.key||k;
+  document.getElementById('weekRange').value=w.range||'';
+  document.getElementById('capacity').value=w.capacity||44;
+  document.getElementById('notesTA').value=w.notes||'';
+  document.getElementById('msBody').innerHTML='';
+  document.getElementById('taskBlocks').innerHTML='';
+  document.getElementById('routineRows').innerHTML='';
+  document.getElementById('calGrid').innerHTML='';
+  document.getElementById('taskPool').innerHTML='<span class="pool-empty" id="poolEmpty">Step 2 태스크 또는 Step 3 루틴을 입력하면 블록이 생성됩니다</span>';
+  msCount=0;taskCounters={};
+
+  buildCalendar();
+  const msList=w.milestones||[];
+  if(msList.length===0){addMS();addMS();addMS();}
+  else msList.forEach(m=>addMS(m));
+
+  const rList=w.routines||[];
+  if(rList.length===0)defaultRoutines().forEach(r=>addRoutine(r));
+  else rList.forEach(r=>addRoutine(r));
+
+  setTimeout(()=>{
+    (w.placements||[]).forEach(p=>{
+      const slot=document.querySelector(`.cal-slot[data-day="${p.day}"][data-hour="${p.hour}"]`);
+      if(slot)placeBlock(slot,p.name,p.hours,p.domIdx,p.msId,p.isRoutine||false);
+    });
+    refreshPool();
+  },60);
   updateTotals();
 }
 
-function syncTaskHeader(id, val) {
-  const header = document.getElementById(`task-header-label-${id}`);
-  if (header) header.textContent = val || `마일스톤 ${id}`;
+// ── MILESTONE ──
+function addMS(d={}){
+  msCount++;
+  const id=msCount;
+  const tbody=document.getElementById('msBody');
+  const tr=document.createElement('tr');
+  tr.id=`ms-${id}`;
+  const fiCls=d.feasibility||'';
+  const fiLbl=FL[FC.indexOf(fiCls)]||FL[0];
+  tr.innerHTML=`
+    <td class="pc"><select class="psel" onchange="setPri(this);debounceSave()">${PRI.map(p=>`<option${d.priority===p?' selected':''}>${p}</option>`).join('')}</select></td>
+    <td class="dc"><select id="msd-${id}" style="font-family:var(--mono);font-size:11px;border:1px solid var(--border);background:var(--surface);padding:2px 4px;border-radius:2px;width:100%;outline:none;cursor:pointer" onchange="debounceSave()">${DOMAINS.map((dm,i)=>`<option value="${i}"${d.domainIdx===i?' selected':''}>${dm}</option>`).join('')}</select></td>
+    <td><textarea class="ms-name" placeholder="예) 쇼츠 제작 인풋 완료 — 4W1까지" oninput="syncHeader(${id},this.value);autoResize(this);debounceSave()">${d.milestone||''}</textarea></td>
+    <td><textarea class="ms-output" placeholder="예) 강의 4개 완강 + 캡컷 실습 영상 1개 업로드 가능 상태" oninput="autoResize(this);debounceSave()">${d.output||''}</textarea></td>
+    <td class="dlc"><input class="ms-deadline" type="text" placeholder="4W1" value="${d.deadline||''}" oninput="debounceSave()"></td>
+    <td class="fc" style="text-align:center"><span class="fb ${fiCls}" onclick="cycleFeas(this);debounceSave()">${fiLbl}</span></td>
+  `;
+  tbody.appendChild(tr);
+  setPri(tr.querySelector('.psel'));
+  addTaskBlock(id,d.milestone||`마일스톤 ${id}`,d.tasks||[]);
+}
+
+function setPri(sel){
+  const v=sel.value;
+  sel.style.background=v==='상'?'var(--red-bg)':v==='중'?'var(--orange-bg)':'var(--faint)';
+  sel.style.color=v==='상'?'var(--red)':v==='중'?'var(--orange)':'var(--muted)';
+  sel.style.borderColor=v==='상'?'#E8A898':v==='중'?'#E8C28A':'var(--border)';
+}
+
+function cycleFeas(el){
+  let cur=FC.indexOf(el.className.replace('fb','').trim());
+  if(cur<0)cur=0;
+  const n=(cur+1)%4;
+  el.className=`fb ${FC[n]}`;el.textContent=FL[n];
+}
+
+function syncHeader(id,val){
+  const h=document.getElementById(`thl-${id}`);
+  if(h)h.textContent=val||`마일스톤 ${id}`;
 }
 
 // ── TASK BLOCK ──
-function addTaskBlock(msId, label) {
-  taskRowCounters[msId] = 0;
-  const container = document.getElementById('taskBlocks');
-  const div = document.createElement('div');
-  div.className = 'task-section';
-  div.id = `task-block-${msId}`;
-  div.style.marginBottom = '8px';
-  div.innerHTML = `
-    <div class="task-section-header">
-      <span id="task-header-label-${msId}">${label || '마일스톤 ' + msId}</span>
-      <span>소계: <span id="task-subtotal-${msId}" style="font-family:var(--mono)">0h</span></span>
+function addTaskBlock(msId,label,tasks=[]){
+  taskCounters[msId]=0;
+  const c=document.getElementById('taskBlocks');
+  const div=document.createElement('div');
+  div.className='task-section';div.id=`tb-${msId}`;div.style.marginBottom='8px';
+  div.innerHTML=`
+    <div class="tsh">
+      <span id="thl-${msId}">${label}</span>
+      <span>예상 소계: <span id="tst-${msId}" style="font-family:var(--mono)">0h</span> &nbsp;·&nbsp; 실제 소계: <span id="tact-${msId}" style="font-family:var(--mono);color:var(--orange)">—</span></span>
     </div>
-    <div class="task-row routine-header" style="background:var(--faint);border-bottom:1px solid var(--border)">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">태스크</div>
-      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">예상 소요</div>
-      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">h</div>
-      <div class="task-divider" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:5px 12px">비고</div>
-    </div>
-    <div id="task-rows-${msId}"></div>
-    <button class="task-add-btn" onclick="addTaskRow(${msId})">+ 태스크 추가</button>
+    <div class="tch"><div>태스크명</div><div>예상 소요 (h)</div><div>실제 소요 (h)</div></div>
+    <div id="trows-${msId}"></div>
+    <button class="tab-btn" onclick="addTaskRow(${msId})">+ 태스크 추가</button>
   `;
-  container.appendChild(div);
-  addTaskRow(msId);
-  addTaskRow(msId);
+  c.appendChild(div);
+  if(tasks.length>0)tasks.forEach(t=>addTaskRow(msId,t));
+  else{addTaskRow(msId);addTaskRow(msId);}
 }
 
-function addTaskRow(msId) {
-  taskRowCounters[msId]++;
-  const rowsContainer = document.getElementById(`task-rows-${msId}`);
-  const row = document.createElement('div');
-  row.className = 'task-row';
-  row.innerHTML = `
-    <input type="text" placeholder="태스크 명 (예: 강의 수강)">
-    <input type="text" class="task-divider" placeholder="예: 4강 × 1h" style="color:var(--muted)">
-    <input type="number" class="task-divider" placeholder="0" min="0" step="0.5"
-      oninput="recalcTaskSubtotal(${msId}); updateTotals()" style="font-family:var(--mono);font-weight:500">
-    <input type="text" class="task-divider" placeholder="메모" style="color:var(--muted)">
+function addTaskRow(msId,d={}){
+  taskCounters[msId]++;
+  const c=document.getElementById(`trows-${msId}`);
+  const row=document.createElement('div');row.className='trow';
+  row.innerHTML=`
+    <input type="text" placeholder="예) 강의 수강 (4강 × 1h)" value="${d.name||''}" oninput="refreshPool();debounceSave()">
+    <input type="number" placeholder="0" min="0" step="0.5" value="${d.estH||''}" oninput="recalcSub(${msId});updateTotals();refreshPool();debounceSave()">
+    <input type="number" class="actual-col" placeholder="—" min="0" step="0.5" value="${d.actH||''}" oninput="recalcSub(${msId});debounceSave()">
   `;
-  rowsContainer.appendChild(row);
+  c.appendChild(row);
 }
 
-function recalcTaskSubtotal(msId) {
-  const rows = document.querySelectorAll(`#task-rows-${msId} .task-row`);
-  let sum = 0;
-  rows.forEach(row => {
-    const inp = row.querySelectorAll('input')[2];
-    if (inp) sum += parseFloat(inp.value) || 0;
+function recalcSub(msId){
+  let est=0,act=0,hasAct=false;
+  document.querySelectorAll(`#trows-${msId} .trow`).forEach(row=>{
+    const ins=row.querySelectorAll('input');
+    est+=parseFloat(ins[1]?.value)||0;
+    const a=parseFloat(ins[2]?.value);
+    if(!isNaN(a)&&ins[2]?.value!==''){act+=a;hasAct=true;}
   });
-  const el = document.getElementById(`task-subtotal-${msId}`);
-  if (el) el.textContent = sum + 'h';
-  return sum;
+  const estEl=document.getElementById(`tst-${msId}`);
+  const actEl=document.getElementById(`tact-${msId}`);
+  if(estEl)estEl.textContent=est+'h';
+  if(actEl)actEl.textContent=hasAct?act+'h':'—';
+  return est;
 }
 
-// ── ROUTINE ROW ──
-function addRoutineRow(data = {}) {
-  routineCount++;
-  const container = document.getElementById('routineRows');
-  const row = document.createElement('div');
-  row.className = 'routine-row';
-  row.innerHTML = `
-    <input type="text" placeholder="예: 일본어 공부" value="${data.name||''}">
-    <input type="text" class="divider" placeholder="주4일 × 0.75h" value="${data.cycle||''}">
-    <input type="number" class="divider" placeholder="0" min="0" step="0.5"
-      value="${data.hours||''}" oninput="updateTotals()" style="font-family:var(--mono);font-weight:500">
-    <input type="text" class="divider" placeholder="" value="${data.note||''}">
+// ── ROUTINE ──
+function addRoutine(d={}){
+  const c=document.getElementById('routineRows');
+  const row=document.createElement('div');row.className='rrow';
+  row.innerHTML=`
+    <input type="text" placeholder="예) 일본어 상시 공부" value="${d.name||''}" oninput="refreshPool();debounceSave()">
+    <input type="text" placeholder="예) 주4일×0.75h" value="${d.cycle||''}" oninput="refreshPool();debounceSave()">
+    <input type="number" placeholder="0" min="0" step="0.5" value="${d.estH||''}" oninput="updateTotals();refreshPool();debounceSave()">
+    <input type="number" class="actual-col" placeholder="—" min="0" step="0.5" value="${d.actH||''}" oninput="debounceSave()">
   `;
-  container.appendChild(row);
+  c.appendChild(row);
 }
 
 // ── TOTALS ──
-function updateTotals() {
-  let msTotal = 0;
-  let routineTotal = 0;
-  const breakdownEl = document.getElementById('totalBreakdown');
-  breakdownEl.innerHTML = '';
-
-  // milestone subtotals
-  for (let id = 1; id <= milestoneCount; id++) {
-    const block = document.getElementById(`task-block-${id}`);
-    if (!block) continue;
-    const label = document.getElementById(`task-header-label-${id}`);
-    const sub = recalcTaskSubtotal(id);
-    if (sub > 0) {
-      msTotal += sub;
-      const line = document.createElement('div');
-      line.className = 'total-item';
-      line.innerHTML = `<span class="name">${label ? label.textContent : '마일스톤 '+id}</span><span class="h">${sub}h</span>`;
-      breakdownEl.appendChild(line);
+function updateTotals(){
+  let msT=0,rT=0;
+  const bd=document.getElementById('totalBreakdown');bd.innerHTML='';
+  for(let id=1;id<=msCount;id++){
+    const s=recalcSub(id);
+    if(s>0){
+      msT+=s;
+      const lbl=document.getElementById(`thl-${id}`);
+      const line=document.createElement('div');line.className='ti';
+      line.innerHTML=`<span class="nm">${lbl?lbl.textContent:'마일스톤 '+id}</span><span class="hh">${s}h</span>`;
+      bd.appendChild(line);
     }
   }
+  document.querySelectorAll('#routineRows .rrow input[type="number"]:nth-child(3)').forEach(inp=>{rT+=parseFloat(inp.value)||0;});
+  if(rT>0){const s=document.createElement('div');s.className='ti';s.innerHTML=`<span class="nm" style="color:var(--muted)">루틴 합계</span><span class="hh">${rT}h</span>`;bd.appendChild(s);}
+  const total=msT+rT,cap=parseFloat(document.getElementById('capacity').value)||44;
+  document.getElementById('totalH').textContent=total+'h';
+  document.getElementById('capInfo').textContent=`가용 ${cap}h 기준`;
+  const diff=total-cap,big=document.getElementById('totalH'),st=document.getElementById('totalSt');
+  if(total===0){st.textContent='—';big.style.color='var(--bg)';}
+  else if(diff>2){st.textContent=`+${diff.toFixed(1)}h 초과`;big.style.color='#E8A898';}
+  else if(diff>=-2){st.textContent='✓ 적정 배분';big.style.color='#9FE1CB';}
+  else{st.textContent=`${Math.abs(diff).toFixed(1)}h 여유`;big.style.color='var(--bg)';}
+  if(bd.children.length===0)bd.innerHTML='<div style="color:var(--muted);font-size:11px;font-family:var(--mono)">입력하면 자동 계산됩니다</div>';
+}
 
-  // routine total
-  const routineInputs = document.querySelectorAll('#routineRows .routine-row input[type="number"]');
-  routineInputs.forEach(inp => {
-    routineTotal += parseFloat(inp.value) || 0;
+// ── PARSE ROUTINE CYCLE (주3일×1.5h → days=3, hoursPerSession=1.5) ──
+function parseCycle(cycleStr){
+  if(!cycleStr)return null;
+  // patterns: 주3일×1.5h / 주3일x1.5h / 매일×0.5h
+  const m=cycleStr.match(/주(\d+)일[×x](\d+\.?\d*)h/i);
+  if(m)return{days:parseInt(m[1]),hPerSession:parseFloat(m[2])};
+  const m2=cycleStr.match(/매일[×x](\d+\.?\d*)h/i);
+  if(m2)return{days:5,hPerSession:parseFloat(m2[1])};
+  return null;
+}
+
+// ── POOL ──
+function getDomIdx(msId){const s=document.getElementById(`msd-${msId}`);return s?parseInt(s.value)||0:0;}
+
+function refreshPool(){
+  const pool=document.getElementById('taskPool');
+  pool.querySelectorAll('.task-chip').forEach(c=>c.remove());
+  let has=false;
+
+  // task chips
+  for(let msId=1;msId<=msCount;msId++){
+    const domIdx=getDomIdx(msId);
+    document.querySelectorAll(`#trows-${msId} .trow`).forEach(row=>{
+      const ins=row.querySelectorAll('input');
+      const name=ins[0]?.value.trim();
+      const hours=parseFloat(ins[1]?.value)||0;
+      if(!name||hours<=0)return;
+      has=true;
+      if(document.querySelector(`.placed-block[data-name="${name}"][data-ms-id="${msId}"]`))return;
+      pool.appendChild(makePoolChip(name,hours,domIdx,msId,false));
+    });
+  }
+
+  // routine chips — generate N chips based on cycle
+  document.querySelectorAll('#routineRows .rrow').forEach((rrow,idx)=>{
+    const ins=rrow.querySelectorAll('input');
+    const name=ins[0]?.value.trim();
+    const cycleStr=ins[1]?.value.trim();
+    const estH=parseFloat(ins[2]?.value)||0;
+    if(!name||estH<=0)return;
+    const parsed=parseCycle(cycleStr);
+    const count=parsed?parsed.days:1;
+    const hPerBlock=parsed?parsed.hPerSession:estH;
+    has=true;
+    // count how many already placed
+    const placedCount=document.querySelectorAll(`.placed-block[data-routine-idx="${idx}"]`).length;
+    const remaining=Math.max(0,count-placedCount);
+    for(let i=0;i<remaining;i++){
+      pool.appendChild(makePoolChip(name,hPerBlock,6,`routine_${idx}`,true));
+    }
   });
-  if (routineTotal > 0) {
-    const sep = document.createElement('div');
-    sep.className = 'total-item';
-    sep.innerHTML = `<span class="name" style="color:var(--muted)">루틴 합계</span><span class="h">${routineTotal}h</span>`;
-    breakdownEl.appendChild(sep);
-  }
 
-  const total = msTotal + routineTotal;
-  const cap = parseFloat(document.getElementById('capacity').value) || 44;
-
-  document.getElementById('totalHours').textContent = total + 'h';
-  document.getElementById('capInfo').textContent = `가용 ${cap}h 기준`;
-
-  const diff = total - cap;
-  const statusEl = document.getElementById('totalStatus');
-  const bigEl = document.getElementById('totalHours');
-  if (total === 0) {
-    statusEl.textContent = '—';
-    bigEl.style.color = 'var(--bg)';
-  } else if (diff > 2) {
-    statusEl.textContent = `+${diff.toFixed(1)}h 초과 → 항목 조정 필요`;
-    bigEl.style.color = '#E8A898';
-  } else if (diff >= -2) {
-    statusEl.textContent = `✓ 적정 배분`;
-    bigEl.style.color = '#9FE1CB';
-  } else {
-    statusEl.textContent = `${Math.abs(diff).toFixed(1)}h 여유 → 추가 투입 가능`;
-    bigEl.style.color = 'var(--bg)';
-  }
-
-  if (breakdownEl.children.length === 0) {
-    breakdownEl.innerHTML = '<div class="total-item" style="color:var(--muted);font-size:11px;font-family:var(--mono)">마일스톤과 루틴을 입력하면 자동 계산됩니다</div>';
-  }
+  const e=document.getElementById('poolEmpty');
+  if(e)e.style.display=has?'none':'inline';
 }
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
+function makePoolChip(name,hours,domIdx,msId,isRoutine){
+  const chip=document.createElement('div');
+  chip.className=`task-chip dc-${domIdx}${isRoutine?' routine-chip':''}`;
+  chip.draggable=true;
+  chip.innerHTML=`<span class="chip-dot"></span><span class="chip-name">${name}</span><span class="chip-h">${hours}h</span>`;
+  const data={name,hours,domIdx,msId:String(msId),isRoutine:isRoutine?1:0};
+  chip.addEventListener('dragstart',e=>{
+    dragData=data;chip.classList.add('dragging');
+    e.dataTransfer.effectAllowed='copy';
+    e.dataTransfer.setData('text/plain',JSON.stringify(data));
+  });
+  chip.addEventListener('dragend',()=>{chip.classList.remove('dragging');dragData=null;});
+  return chip;
 }
 
-// ── INIT: 빈 행 3개 + 루틴 3개 ──
-window.onload = () => {
-  addMilestoneRow();
-  addMilestoneRow();
-  addMilestoneRow();
+// ── CALENDAR ──
+function buildCalendar(){
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  const corner=document.createElement('div');corner.className='cal-corner';grid.appendChild(corner);
+  DAYS.forEach(d=>{const h=document.createElement('div');h.className='cal-day-hdr';h.textContent=d;grid.appendChild(h);});
+  HOURS.forEach(hour=>{
+    const tl=document.createElement('div');tl.className='cal-time';tl.textContent=`${hour}:00`;grid.appendChild(tl);
+    DAYS.forEach((_,dayIdx)=>{
+      const slot=document.createElement('div');slot.className='cal-slot';slot.dataset.day=dayIdx;slot.dataset.hour=hour;
+      slot.addEventListener('dragover',e=>{e.preventDefault();slot.classList.add('drag-over');});
+      slot.addEventListener('dragleave',()=>slot.classList.remove('drag-over'));
+      slot.addEventListener('drop',e=>{
+        e.preventDefault();slot.classList.remove('drag-over');
+        const d=JSON.parse(e.dataTransfer.getData('text/plain'));
+        placeBlock(slot,d.name,d.hours,d.domIdx,d.msId,d.isRoutine===1||d.isRoutine===true);
+        document.querySelectorAll('#taskPool .task-chip').forEach(c=>{
+          if(c.querySelector('.chip-name')?.textContent===d.name&&!c.querySelector('.chip-name')?.closest('.placed-block')){
+            c.remove();return;
+          }
+        });
+        // remove first matching pool chip
+        const poolChips=Array.from(document.querySelectorAll('#taskPool .task-chip'));
+        const match=poolChips.find(c=>c.querySelector('.chip-name')?.textContent===d.name);
+        if(match)match.remove();
+        const e2=document.getElementById('poolEmpty');
+        if(e2&&!document.getElementById('taskPool').querySelector('.task-chip'))e2.style.display='inline';
+        debounceSave();
+      });
+      grid.appendChild(slot);
+    });
+  });
+}
 
-  addRoutineRow({ name:'경제/경영 이론 학습', cycle:'주3일 × 1.5h', hours:4.5 });
-  addRoutineRow({ name:'일본어 상시 공부', cycle:'주4일 × 0.75h', hours:3 });
-  addRoutineRow({ name:'상시 투자 운영', cycle:'매일 × 0.5h', hours:2.5 });
-  updateTotals();
+function placeBlock(slot,name,hours,domIdx,msId,isRoutine){
+  const heightPx=Math.max(hours*SLOT_H-4,SLOT_H*0.6);
+  const block=document.createElement('div');
+  block.className=`placed-block dc-${domIdx}${isRoutine?' routine-placed':''}`;
+  block.dataset.name=name;block.dataset.hours=hours;block.dataset.domIdx=domIdx;
+  block.dataset.msId=String(msId);block.dataset.isRoutine=isRoutine?'1':'0';
+  if(isRoutine&&String(msId).startsWith('routine_'))block.dataset.routineIdx=String(msId).replace('routine_','');
+  block.style.height=heightPx+'px';
+  block.innerHTML=`
+    <div class="pb-top">
+      <span class="pb-dot"></span>
+      <span class="pb-name">${name}</span>
+      <span class="pb-h">${hours}h</span>
+      <span class="pb-remove" onclick="removeBlock(this)">×</span>
+    </div>
+    ${hours>=0.5?`<div class="pb-bottom"><button class="gcal-btn" onclick="openGcal(this)">G캘 추가</button></div>`:''}
+  `;
+  slot.appendChild(block);
+}
+
+function removeBlock(btn){
+  btn.closest('.placed-block').remove();
+  refreshPool();debounceSave();
+}
+
+function openGcal(btn){
+  const block=btn.closest('.placed-block');
+  const slot=block.closest('.cal-slot');
+  const name=block.dataset.name;
+  const hours=parseFloat(block.dataset.hours)||1;
+  const dayIdx=parseInt(slot.dataset.day);
+  const hour=parseInt(slot.dataset.hour);
+  const rangeVal=document.getElementById('weekRange').value;
+  let startDate=new Date();
+  const match=rangeVal.match(/(\d+)\/(\d+)/);
+  if(match){
+    const now=new Date();
+    startDate=new Date(now.getFullYear(),parseInt(match[1])-1,parseInt(match[2]));
+    startDate.setDate(startDate.getDate()+dayIdx);
+  }
+  startDate.setHours(hour,0,0,0);
+  const endDate=new Date(startDate.getTime()+hours*3600000);
+  const pad=n=>String(n).padStart(2,'0');
+  const fmt=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(name)}&dates=${fmt(startDate)}/${fmt(endDate)}`,'_blank');
+}
+
+function exportAllToGcal(){
+  const blocks=document.querySelectorAll('.placed-block');
+  if(blocks.length===0){alert('캘린더에 배치된 태스크가 없습니다.');return;}
+  blocks.forEach((block,i)=>{
+    setTimeout(()=>{const btn=block.querySelector('.gcal-btn');if(btn)openGcal(btn);},i*450);
+  });
+}
+
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// ── INIT ──
+window.onload=()=>{
+  loadAllWeeks();renderWeekTabs();loadWeek(currentWeek);
 };
 </script>
 </body>
